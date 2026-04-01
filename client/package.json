@@ -1,0 +1,20 @@
+{
+    "name": "@skrivstudio/client",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@skrivstudio/shared": "*",
+        "@solidjs/router": "^0.15.3",
+        "solid-js": "^1.9.3"
+    },
+    "devDependencies": {
+        "typescript": "*",
+        "vite": "^6.1.0",
+        "vite-plugin-solid": "^2.11.0"
+    }
+}

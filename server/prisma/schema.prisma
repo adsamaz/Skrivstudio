@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  role         String   @default("student")
+  totalXp      Int      @default(0)
+  level        Int      @default(1)
+  createdAt    DateTime @default(now())
+
+  createdExercises Exercise[]
+  attempts         ExerciseAttempt[]
+  categoryProgress UserProgress[]
+  achievements     UserAchievement[]
+  streak           Streak?
+}
+
+model Exercise {
+  id           String   @id @default(cuid())
+  title        String
+  instructions String
+  type         String
+  difficulty   Int
+  category     String
+  xpReward     Int
+  createdById  String
+  createdAt    DateTime @default(now())
+
+  createdBy User       @relation(fields: [createdById], references: [id])
+  questions Question[]
+  attempts  ExerciseAttempt[]
+
+  @@index([category])
+  @@index([difficulty])
+  @@index([type])
+}
+
+model Question {
+  id         String @id @default(cuid())
+  exerciseId String
+  data       Json
+  order      Int
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@index([exerciseId, order])
+}
+
+model ExerciseAttempt {
+  id          String   @id @default(cuid())
+  userId      String
+  exerciseId  String
+  completedAt DateTime @default(now())
+  score       Int
+  xpEarned    Int
+  timeTakenMs Int
+
+  user     User     @relation(fields: [userId], references: [id])
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@index([userId])
+  @@index([exerciseId])
+}
+
+model UserProgress {
+  userId         String
+  category       String
+  masteryPercent Float @default(0)
+  attemptsCount  Int   @default(0)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@id([userId, category])
+}
+
+model Achievement {
+  id          String @id @default(cuid())
+  key         String @unique
+  title       String
+  description String
+  xpBonus     Int    @default(0)
+
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  userId        String
+  achievementId String
+  earnedAt      DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id])
+  achievement Achievement @relation(fields: [achievementId], references: [id])
+
+  @@id([userId, achievementId])
+}
+
+model Streak {
+  userId           String    @unique
+  currentStreak    Int       @default(0)
+  longestStreak    Int       @default(0)
+  lastPracticeDate DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+}
