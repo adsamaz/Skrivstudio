@@ -33,7 +33,7 @@ async function main() {
     await prisma.user.upsert({
         where: { username: 'larare' },
         update: {},
-        create: { username: 'larare', passwordHash, role: 'teacher' },
+        create: { username: 'larare', email: 'larare@tim.com', passwordHash, role: 'teacher' },
     });
 
     const teacher = await prisma.user.findUnique({ where: { username: 'larare' } });
