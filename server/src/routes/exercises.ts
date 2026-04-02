@@ -1,4 +1,5 @@
 import { Router, Response, Request } from 'express';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../db/client.js';
 import { ExerciseCategory, ExerciseDifficulty, ExerciseType } from '@skrivstudio/shared';
 
@@ -7,10 +8,10 @@ const router = Router();
 router.get('/', async (req: Request, res: Response) => {
     const { category, difficulty, type } = req.query;
 
-    const where: Record<string, unknown> = {};
-    if (category) where.category = category as ExerciseCategory;
-    if (difficulty) where.difficulty = Number(difficulty) as ExerciseDifficulty;
-    if (type) where.type = type as ExerciseType;
+    const where: Prisma.ExerciseWhereInput = {};
+    if (category) where.category = (Array.isArray(category) ? category[0] : category) as ExerciseCategory;
+    if (difficulty) where.difficulty = Number(Array.isArray(difficulty) ? difficulty[0] : difficulty) as ExerciseDifficulty;
+    if (type) where.type = (Array.isArray(type) ? type[0] : type) as ExerciseType;
 
     try {
         const exercises = await prisma.exercise.findMany({
@@ -39,7 +40,7 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/:id', async (req: Request, res: Response) => {
     try {
         const exercise = await prisma.exercise.findUnique({
-            where: { id: req.params.id },
+            where: { id: String(req.params.id) },
             include: { questions: { orderBy: { order: 'asc' } } },
         });
 

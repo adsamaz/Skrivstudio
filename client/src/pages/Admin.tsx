@@ -1,4 +1,4 @@
-import { createSignal, createResource, For, Show, Switch, Match } from 'solid-js';
+import { createSignal, createResource, For, Index, Show, Switch, Match } from 'solid-js';
 import {
     ExerciseSummary,
     ExercisePublic,
@@ -37,10 +37,10 @@ function IdentifieraEditor(props: {
                     class="input"
                     type="text"
                     value={words().join(' ')}
-                    onInput={(e) =>
+                    onBlur={(e) =>
                         props.onChange({
                             ...props.data,
-                            words: e.currentTarget.value.split(' ').filter(Boolean),
+                            words: e.currentTarget.value.trim().split(/\s+/).filter(Boolean),
                             correctIndices: [],
                         })
                     }
@@ -93,7 +93,7 @@ function OrdnaEditor(props: { data: OrdnaData; onChange: (d: OrdnaData) => void 
                     class="input"
                     type="text"
                     value={props.data.correctOrder.map((i) => props.data.words[i]).join(', ')}
-                    onInput={(e) => {
+                    onBlur={(e) => {
                         const ws = e.currentTarget.value.split(',').map((w) => w.trim()).filter(Boolean);
                         const correctOrder = ws.map((_, i) => i);
                         props.onChange({ words: ws, correctOrder });
@@ -161,7 +161,7 @@ function ValjRattEditor(props: { data: ValjRattData; onChange: (d: ValjRattData)
                     class="input"
                     type="text"
                     value={props.data.options.join(', ')}
-                    onInput={(e) => {
+                    onBlur={(e) => {
                         const opts = e.currentTarget.value.split(',').map((o) => o.trim()).filter(Boolean);
                         props.onChange({ ...props.data, options: opts, correctIndex: 0 });
                     }}
@@ -358,16 +358,16 @@ function ExerciseForm(props: {
             </div>
 
             <h3 class="section-title mt-2">Frågor</h3>
-            <For each={form().questions}>
+            <Index each={form().questions}>
                 {(qData, i) => (
                     <div class="card mb-2" style="border-left:3px solid var(--color-accent)">
                         <div class="flex justify-between items-center mb-1">
-                            <strong>Fråga {i() + 1}</strong>
+                            <strong>Fråga {i + 1}</strong>
                             <Show when={form().questions.length > 1}>
                                 <button
                                     type="button"
                                     class="btn btn-danger btn-sm"
-                                    onClick={() => removeQuestion(i())}
+                                    onClick={() => removeQuestion(i)}
                                 >
                                     Ta bort
                                 </button>
@@ -376,32 +376,32 @@ function ExerciseForm(props: {
                         <Switch>
                             <Match when={form().type === 'identifiera'}>
                                 <IdentifieraEditor
-                                    data={qData as IdentifieraData}
-                                    onChange={(d) => updateQuestion(i(), d)}
+                                    data={qData() as IdentifieraData}
+                                    onChange={(d) => updateQuestion(i, d)}
                                 />
                             </Match>
                             <Match when={form().type === 'ordna'}>
                                 <OrdnaEditor
-                                    data={qData as OrdnaData}
-                                    onChange={(d) => updateQuestion(i(), d)}
+                                    data={qData() as OrdnaData}
+                                    onChange={(d) => updateQuestion(i, d)}
                                 />
                             </Match>
                             <Match when={form().type === 'fyllI'}>
                                 <FyllIEditor
-                                    data={qData as FyllIData}
-                                    onChange={(d) => updateQuestion(i(), d)}
+                                    data={qData() as FyllIData}
+                                    onChange={(d) => updateQuestion(i, d)}
                                 />
                             </Match>
                             <Match when={form().type === 'valjRatt'}>
                                 <ValjRattEditor
-                                    data={qData as ValjRattData}
-                                    onChange={(d) => updateQuestion(i(), d)}
+                                    data={qData() as ValjRattData}
+                                    onChange={(d) => updateQuestion(i, d)}
                                 />
                             </Match>
                         </Switch>
                     </div>
                 )}
-            </For>
+            </Index>
 
             <button type="button" class="btn btn-secondary mb-2" onClick={addQuestion}>
                 + Lägg till fråga

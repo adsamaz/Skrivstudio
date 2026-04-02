@@ -15,7 +15,7 @@ export default function IdentifieraExercise(props: Props) {
     createEffect(() => {
         // Reset when question changes
         void props.question.id;
-        setSelected(new Set());
+        setSelected(new Set<number>());
         setSubmitted(false);
         setCorrect(false);
     });

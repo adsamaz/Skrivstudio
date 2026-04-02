@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../db/client.js';
 import { authMiddleware, teacherOnly, AuthenticatedRequest } from '../middleware/auth.js';
 import { CreateExerciseRequest, UpdateExerciseRequest } from '@skrivstudio/shared';
@@ -35,7 +36,7 @@ router.get('/exercises', async (_req, res: Response) => {
 router.get('/exercises/:id', async (req, res: Response) => {
     try {
         const exercise = await prisma.exercise.findUnique({
-            where: { id: req.params.id },
+            where: { id: String(req.params.id) },
             include: { questions: { orderBy: { order: 'asc' } } },
         });
         if (!exercise) {
@@ -85,7 +86,7 @@ router.post('/exercises', async (req: AuthenticatedRequest, res: Response) => {
             await tx.question.createMany({
                 data: questions.map((q) => ({
                     exerciseId: ex.id,
-                    data: q.data,
+                    data: q.data as unknown as Prisma.InputJsonValue,
                     order: q.order,
                 })),
             });
@@ -119,19 +120,20 @@ router.put('/exercises/:id', async (req, res: Response) => {
 
     try {
         const exercise = await prisma.$transaction(async (tx) => {
-            await tx.exercise.update({ where: { id: req.params.id }, data: fields });
+            const exerciseId = String(req.params.id);
+            await tx.exercise.update({ where: { id: exerciseId }, data: fields });
             if (questions) {
-                await tx.question.deleteMany({ where: { exerciseId: req.params.id } });
+                await tx.question.deleteMany({ where: { exerciseId } });
                 await tx.question.createMany({
                     data: questions.map((q) => ({
-                        exerciseId: req.params.id,
-                        data: q.data,
+                        exerciseId,
+                        data: q.data as unknown as Prisma.InputJsonValue,
                         order: q.order,
                     })),
                 });
             }
             return tx.exercise.findUnique({
-                where: { id: req.params.id },
+                where: { id: exerciseId },
                 include: { questions: { orderBy: { order: 'asc' } } },
             });
         });
@@ -161,7 +163,7 @@ router.put('/exercises/:id', async (req, res: Response) => {
 // Delete exercise
 router.delete('/exercises/:id', async (req, res: Response) => {
     try {
-        await prisma.exercise.delete({ where: { id: req.params.id } });
+        await prisma.exercise.delete({ where: { id: String(req.params.id) } });
         res.json({ ok: true });
     } catch (err) {
         console.error(err);

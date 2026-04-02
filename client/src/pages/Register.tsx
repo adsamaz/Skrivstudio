@@ -6,6 +6,7 @@ export default function Register() {
     const [, { register }] = useAuth();
     const navigate = useNavigate();
     const [username, setUsername] = createSignal('');
+    const [email, setEmail] = createSignal('');
     const [password, setPassword] = createSignal('');
     const [error, setError] = createSignal('');
     const [loading, setLoading] = createSignal(false);
@@ -15,7 +16,7 @@ export default function Register() {
         setError('');
         setLoading(true);
         try {
-            await register({ username: username(), password: password() });
+            await register({ username: username(), email: email(), password: password() });
             navigate('/');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Registrering misslyckades');
@@ -41,6 +42,18 @@ export default function Register() {
                                 autocomplete="username"
                                 minLength={2}
                                 maxLength={30}
+                                required
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="email">E-postadress</label>
+                            <input
+                                id="email"
+                                class="input"
+                                type="email"
+                                value={email()}
+                                onInput={(e) => setEmail(e.currentTarget.value)}
+                                autocomplete="email"
                                 required
                             />
                         </div>

@@ -186,8 +186,7 @@ export default function ExercisePlay() {
                                 level={attemptResult()!.newLevel}
                                 xpToNextLevel={
                                     (function () {
-                                        // inline xpForLevel
-                                        const l = attemptResult()!.newLevel;
+                                        const l = attemptResult()!.newLevel + 1;
                                         return (l * (l + 1)) / 2 * 50 - attemptResult()!.newTotalXp;
                                     })()
                                 }

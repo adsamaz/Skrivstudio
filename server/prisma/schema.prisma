@@ -7,13 +7,16 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  username     String   @unique
-  passwordHash String
-  role         String   @default("student")
-  totalXp      Int      @default(0)
-  level        Int      @default(1)
-  createdAt    DateTime @default(now())
+  id                String    @id @default(cuid())
+  username          String    @unique
+  email             String    @unique
+  emailVerified     Boolean   @default(false)
+  verificationToken String?
+  passwordHash      String
+  role              String    @default("student")
+  totalXp           Int       @default(0)
+  level             Int       @default(1)
+  createdAt         DateTime  @default(now())
 
   createdExercises Exercise[]
   attempts         ExerciseAttempt[]
